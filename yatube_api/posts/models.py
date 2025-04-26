@@ -22,6 +22,13 @@ class Post(models.Model):
         related_name="posts",
         verbose_name="Автор"
     )
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.SET_NULL,
+        related_name="posts",
+        blank=True,
+        null=True,
+    )
     image = models.ImageField(
         upload_to="posts/", null=True, blank=True
     )
@@ -36,13 +43,6 @@ class Comment(models.Model):
     )
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="comments"
-    )
-    group = models.ForeignKey(
-        Group,
-        on_delete=models.SET_NULL,
-        related_name="posts",
-        blank=True,
-        null=True,
     )
     text = models.TextField("Текст комментария")
     created = models.DateTimeField(
@@ -65,4 +65,3 @@ class Follow(models.Model):
                 name='unique_follow'
             )
         ]
-

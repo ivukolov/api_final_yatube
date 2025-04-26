@@ -1,5 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import LimitOffsetPagination
+from django.conf import settings
 
 from posts.models import Post, Comment, Group
 from api.serializers import PostSerializer, GroupSerializer, CommentSerializer
@@ -10,6 +12,8 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = (IsAuthorOrReadOnly, )
+    pagination_class = LimitOffsetPagination
+    page_size = settings.API_PAGE_SIZE
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -18,6 +22,7 @@ class PostViewSet(viewsets.ModelViewSet):
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    permission_classes = (IsAuthorOrReadOnly, )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
