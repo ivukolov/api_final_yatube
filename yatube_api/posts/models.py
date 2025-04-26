@@ -14,13 +14,16 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField("Текст поста")
+    text = models.TextField(verbose_name="Текст поста")
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
     author = models.ForeignKey(
-        "Автор", User, on_delete=models.CASCADE, related_name="posts"
+        User,
+        on_delete=models.CASCADE,
+        related_name="posts",
+        verbose_name="Автор"
     )
     image = models.ImageField(
-        "Изображение", upload_to="posts/", null=True, blank=True
+        upload_to="posts/", null=True, blank=True
     )
 
     def __str__(self):
@@ -29,13 +32,12 @@ class Post(models.Model):
 
 class Comment(models.Model):
     author = models.ForeignKey(
-        "Автор", User, on_delete=models.CASCADE, related_name="comments"
+        User, on_delete=models.CASCADE, related_name="comments"
     )
     post = models.ForeignKey(
-        "Пост", Post, on_delete=models.CASCADE, related_name="comments"
+        Post, on_delete=models.CASCADE, related_name="comments"
     )
     group = models.ForeignKey(
-        "Группа",
         Group,
         on_delete=models.SET_NULL,
         related_name="posts",
@@ -44,14 +46,23 @@ class Comment(models.Model):
     )
     text = models.TextField("Текст комментария")
     created = models.DateTimeField(
-        "Дата добавления", auto_now_add=True, db_index=True
+        auto_now_add=True, db_index=True
     )
 
 
 class Follow(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='following'
+        User, on_delete=models.CASCADE, related_name="follower"
     )
     following = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='followers'
+        User, on_delete=models.CASCADE, related_name="following"
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following'],
+                name='unique_follow'
+            )
+        ]
+
