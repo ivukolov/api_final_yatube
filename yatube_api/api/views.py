@@ -1,11 +1,17 @@
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
+from rest_framework import status
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
-from posts.models import Post, Comment, Group
-from api.serializers import PostSerializer, GroupSerializer, CommentSerializer
-from .permissions import IsAuthorOrReadOnly
+from posts.models import Post, Comment, Group, Follow
+from api.serializers import PostSerializer, GroupSerializer, CommentSerializer, FollowSerializer
+from .permissions import IsAuthorOrReadOnly, OnlyAuthenticatedOrNot
+
+
+user = get_user_model()
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -39,3 +45,21 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_post_queryset(self):
         return get_object_or_404(Post, pk=self.kwargs.get('post_id'))
+
+
+class FollowViewSet(viewsets.ModelViewSet):
+    serializer_class = FollowSerializer
+    queryset = Follow.objects.all()
+    permission_classes = (OnlyAuthenticatedOrNot, )
+
+    def get_queryset(self):
+        return Follow.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(
+            {"detail": "Доступ к отдельным объектам по ID запрещен"},
+            status=status.HTTP_404_NOT_FOUND
+        )
