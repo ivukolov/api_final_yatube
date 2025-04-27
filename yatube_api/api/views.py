@@ -3,13 +3,23 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import filters
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-from posts.models import Post, Comment, Group, Follow
-from api.serializers import PostSerializer, GroupSerializer, CommentSerializer, FollowSerializer
+from posts.models import (
+    Post,
+    Comment,
+    Group,
+    Follow
+)
+from api.serializers import (
+    PostSerializer,
+    GroupSerializer,
+    CommentSerializer,
+    FollowSerializer
+)
 from .permissions import IsAuthorOrReadOnly, OnlyAuthenticatedOrNot
-
 
 user = get_user_model()
 
@@ -51,6 +61,8 @@ class FollowViewSet(viewsets.ModelViewSet):
     serializer_class = FollowSerializer
     queryset = Follow.objects.all()
     permission_classes = (OnlyAuthenticatedOrNot, )
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('following__username', )
 
     def get_queryset(self):
         return Follow.objects.filter(user=self.request.user)
