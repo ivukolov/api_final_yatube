@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.views.decorators.http import condition
 
 User = get_user_model()
 
